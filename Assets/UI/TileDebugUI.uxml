@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="Base" style="flex-grow: 1; position: relative; width: auto;">
+        <ui:Label tabindex="-1" text="Tiles Debug" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TileLabel" style="height: 100%; width: 100%; -unity-text-align: middle-center; white-space: nowrap; text-overflow: ellipsis; font-size: 64px;" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -143,6 +143,10 @@ public class TilesBase
 /// </summary>
 public class Suits : TilesBase
 {
+    public Suits() 
+    {
+        tileType = TileType.Number;
+    }
     public SuitsType suitsType;
     public SuitsNumberType suitsNumberType;
     public int number;
@@ -153,6 +157,10 @@ public class Suits : TilesBase
 /// </summary>
 public class HonoursBase : TilesBase
 {
+    public HonoursBase()
+    {
+        tileType = TileType.Honours;
+    }
     public HonoursType honoursType;
     public string honoursText;
 }
@@ -162,6 +170,10 @@ public class HonoursBase : TilesBase
 /// </summary>
 public class YuanHonours : HonoursBase
 {
+    public YuanHonours()
+    {
+        honoursType = HonoursType.ThreeYuan;
+    }
     public YuanType yuanType;
 }
 
@@ -170,6 +182,10 @@ public class YuanHonours : HonoursBase
 /// </summary>
 public class WindHonours : HonoursBase
 {
+    public WindHonours ()
+    {
+        honoursType = HonoursType.WindTiles;
+    }
     public WindType windType;
 }
 
