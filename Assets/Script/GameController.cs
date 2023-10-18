@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Linq;
+using static UnityEditor.Experimental.GraphView.Port;
+using UnityEngine.Tilemaps;
 
 public class GameController : MonoBehaviour
 {
@@ -14,11 +16,38 @@ public class GameController : MonoBehaviour
     List<TilesBase> tileRandomList;
     int tileCount;
 
+    /// <summary>
+    /// playerÇÃêî
+    /// </summary>
+    readonly int maxPlayerNum = 4;  
+    /// <summary>
+    /// â§îvÇÃêî
+    /// </summary>
+    readonly int deadWallNum = 14;  
+    /// <summary>
+    /// îzîvÇîzÇÈÇ∆Ç´âΩå¬Ç∏Ç¬îvÇÇ∆Ç¡ÇƒÇ¢Ç≠Ç©
+    /// </summary>
+    readonly int startPickUpTileNum = 4;
+    /// <summary>
+    /// îzîvÇîzÇÈÇ∆Ç´âΩâÒÇ∆ÇÈÇ©
+    /// </summary>
+    readonly int startPickUpTileCount = 3;  
+
+
+    [SerializeField] GameObject playerObj;
+    List<PlayerController> playerControllers = new List<PlayerController>();
+
     // Start is called before the first frame update
     void Awake()
     {
-        tilesData = new TilesData();
-        tileList  = tilesData.GetTiles();
+        for (int i = 0; i < maxPlayerNum; i++)
+        {
+            GameObject gameObject = Instantiate(playerObj);
+            PlayerController playerController = gameObject.GetComponent<PlayerController>();
+            playerControllers.Add(playerController);
+        }
+
+        InitializeWallTiles();
         tileCount = 0;
         Debug.Log(tileList.Count);
 
@@ -41,6 +70,8 @@ public class GameController : MonoBehaviour
 
         System.Random rand = new System.Random();
         tileRandomList = tileList.OrderBy(_ => rand.Next()).ToList();
+
+        InitializePlayerTiles();
     }
 
     // Update is called once per frame
@@ -48,84 +79,203 @@ public class GameController : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            if (tileRandomList.Count <= tileCount)
-                return;
-
-            var labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-            labelElement.text = "";
-
-            if (tileRandomList[tileCount].tileType == TileType.Number)
+            for(int i = 0; i < playerControllers.Count; i++)
             {
-                Suits suits = (Suits)tileRandomList[tileCount];
+                playerControllers[i].SortTiles();
+                DebugPlayerTiles(playerControllers[i].GetTiles());
+            }
+        }
+    }
+
+    /// <summary>
+    /// ÉvÉåÉCÉÑÅ[ÇÃîzîvçÏê¨
+    /// </summary>
+    void InitializePlayerTiles()
+    {
+        tileCount = 0;
+        for (int i = 0; i < playerControllers.Count; i++)
+        {
+            for (int j = 0; j < startPickUpTileCount; j++)
+            {
+                for (int k = 0; k < startPickUpTileNum; k++)
+                {
+                    TilesBase tilesBase = GetTile(tileCount);
+                    playerControllers[i].SetTile(tilesBase);
+                    tileCount++;
+                }
+
+            }
+        }
+        for (int i = 0; i < playerControllers.Count; i++)
+        {
+            TilesBase tilesBase = GetTile(tileCount);
+            playerControllers[i].SetTile(tilesBase);
+            tileCount++;
+        }
+
+    }
+
+    /// <summary>
+    /// éRîvèâä˙âª
+    /// </summary>
+    void InitializeWallTiles()
+    {
+        tilesData = new TilesData();
+        tileList = tilesData.GetTiles();
+    }
+
+    /// <summary>
+    /// éRÇ©ÇÁ1Ç¬îvÇéÊÇËèoÇ∑
+    /// </summary>
+    /// <param name="tileNum"></param>
+    /// <returns></returns>
+    TilesBase GetTile(int tileNum)
+    {
+        if (tileRandomList.Count <= tileNum)
+            return null;
+
+        TilesBase tilesBase = tileRandomList[tileNum];
+
+        return tileRandomList[tileNum];
+    }
+
+
+    void DebugGetTileData(TilesBase tilesBase)
+    {
+        if (tilesBase == null)
+            return;
+
+        var labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+        labelElement.text = "";
+
+        if (typeof(Suits) == tilesBase.GetType())
+        {
+            Suits suits = (Suits)tilesBase;
+            if (suits.suitsType == SuitsType.Characters)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "Characters" + suits.number.ToString();
+            }
+            else if (suits.suitsType == SuitsType.Circles)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "Circles" + suits.number.ToString();
+            }
+            else if (suits.suitsType == SuitsType.Bamboo)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "Bamboo" + suits.number.ToString();
+            }
+        }
+        else if(typeof(YuanHonours) == tilesBase.GetType())
+        {
+            YuanHonours yuanHonours = (YuanHonours)tilesBase;
+            if (yuanHonours.yuanType == YuanType.White)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "White";
+            }
+            else if (yuanHonours.yuanType == YuanType.Green)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "Green";
+            }
+            else if (yuanHonours.yuanType == YuanType.Center)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "Center";
+            }
+        }
+        else if(typeof(WindHonours) == tilesBase.GetType())
+        {
+            WindHonours windHonours = (WindHonours)tilesBase;
+            if (windHonours.windType == WindType.East)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "East";
+            }
+            else if (windHonours.windType == WindType.West)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "West";
+            }
+            else if (windHonours.windType == WindType.North)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "North";
+            }
+
+            else if (windHonours.windType == WindType.South)
+            {
+                labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
+                labelElement.text = "South";
+            }
+        }
+
+        labelElement.text = labelElement.text + "::: tile count : " + tileCount.ToString();
+    }
+
+    void DebugPlayerTiles(List<TilesBase> tilesBases)
+    {
+        Debug.Log(tilesBases.Count);
+        string resultString = "";
+
+        for (int i = 0; i < tilesBases.Count; i++)
+        {
+            if (typeof(Suits) == tilesBases[i].GetType())
+            {
+                Suits suits = (Suits)tilesBases[i];
                 if(suits.suitsType == SuitsType.Characters)
                 {
-                    labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                    labelElement.text = "Characters" + suits.number.ToString();
+                    resultString += "ch" + suits.number.ToString();
                 }
                 else if(suits.suitsType == SuitsType.Circles)
                 {
-                    labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                    labelElement.text = "Circles" + suits.number.ToString();
+                    resultString += "ci" + suits.number.ToString();
                 }
                 else if (suits.suitsType == SuitsType.Bamboo)
                 {
-                    labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                    labelElement.text = "Bamboo" + suits.number.ToString();
+                    resultString += "ba" + suits.number.ToString();
                 }
-
             }
-            else if (tileRandomList[tileCount].tileType == TileType.Honours)
+            else if (typeof(YuanHonours) == tilesBases[i].GetType())
             {
-                HonoursBase honoursBase = (HonoursBase)tileRandomList[tileCount];
-                if (honoursBase.honoursType == HonoursType.ThreeYuan)
+                YuanHonours yuanHonours = (YuanHonours)tilesBases[i];
+                if(yuanHonours.yuanType == YuanType.White)
                 {
-                    YuanHonours yuanHonours = (YuanHonours)tileRandomList[tileCount];
-                    if(yuanHonours.yuanType == YuanType.White)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "White";
-                    }
-                    else if (yuanHonours.yuanType == YuanType.Green)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "Green";
-                    }
-                    else if (yuanHonours.yuanType == YuanType.Center)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "Center";
-                    }
-
+                    resultString += "wh";
                 }
-                else if(honoursBase.honoursType == HonoursType.WindTiles)
+                else if (yuanHonours.yuanType == YuanType.Green)
                 {
-                    WindHonours windHonours = (WindHonours)tileRandomList[tileCount];
-                    if (windHonours.windType == WindType.East)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "East";
-                    }
-                    else if (windHonours.windType == WindType.West)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "West";
-                    }
-                    else if (windHonours.windType == WindType.North)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "North";
-                    }
-
-                    else if (windHonours.windType == WindType.South)
-                    {
-                        labelElement = tileDebugUIDocument.rootVisualElement.Q<Label>("TileLabel");
-                        labelElement.text = "South";
-                    }
+                    resultString += "gr";
+                }
+                else if (yuanHonours.yuanType == YuanType.Center)
+                {
+                    resultString += "ce";
                 }
             }
-
-            labelElement.text = labelElement.text + "::: tile count : " + tileCount.ToString();
-            tileCount++;
+            else if (typeof(WindHonours) == tilesBases[i].GetType())
+            {
+                WindHonours windHonours = (WindHonours)tilesBases[i];
+                if(windHonours.windType == WindType.East)
+                {
+                    resultString += "ea";
+                }
+                else if (windHonours.windType == WindType.West)
+                {
+                    resultString += "we";
+                }
+                else if (windHonours.windType == WindType.North)
+                {
+                    resultString += "no";
+                }
+                else if (windHonours.windType == WindType.South)
+                {
+                    resultString += "so";
+                }
+            }
         }
+
+        Debug.Log(resultString);
     }
 }

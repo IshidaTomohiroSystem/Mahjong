@@ -13,6 +13,7 @@ public class TilesData
         InitializeTiles();
     }
 
+
     /// <summary>
     /// 1í—Ş‚Ì”v‚Ì–‡” 4
     /// </summary> 
@@ -136,6 +137,98 @@ public class TilesBase
 {
     public TileType tileType;
     public Sprite tileTexture;
+
+    /// <summary>
+    /// sort
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
+    public static int CompareTiles(TilesBase a, TilesBase b)
+    {
+        if (typeof(Suits) == a.GetType() && typeof(Suits) == b.GetType())
+        {
+            Suits aSuits = (Suits)a;
+            Suits bSuits = (Suits)b;
+            if (aSuits.suitsType == bSuits.suitsType)
+            {
+                if (aSuits.number <= bSuits.number)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            else
+            {
+                if ((int)aSuits.suitsType <= (int)bSuits.suitsType)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+        }
+        else if (typeof(Suits) == a.GetType() && typeof(YuanHonours) == b.GetType())
+        {
+            return -1;
+        }
+        else if (typeof(Suits) == a.GetType() && typeof(WindHonours) == b.GetType())
+        {
+            return -1;
+        }
+        else if (typeof(YuanHonours) == a.GetType() && typeof(Suits) == b.GetType())
+        {
+            return 1;
+        }
+        else if (typeof(YuanHonours) == a.GetType() && typeof(YuanHonours) == b.GetType())
+        {
+            YuanHonours aYuanHonours = (YuanHonours)a;
+            YuanHonours bYuanHonours = (YuanHonours)b;
+            if ((int)aYuanHonours.yuanType <= (int)bYuanHonours.yuanType)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else if (typeof(YuanHonours) == a.GetType() && typeof(WindHonours) == b.GetType())
+        {
+            return -1;
+        }
+        else if (typeof(WindHonours) == a.GetType() && typeof(Suits) == b.GetType())
+        {
+            return 1;
+        }
+        else if (typeof(WindHonours) == a.GetType() && typeof(YuanHonours) == b.GetType())
+        {
+            return 1;
+        }
+        else if (typeof(WindHonours) == a.GetType() && typeof(WindHonours) == b.GetType())
+        {
+            WindHonours aWindHonours = (WindHonours)a;
+            WindHonours bWindHonours = (WindHonours)b;
+            if ((int)aWindHonours.windType <= (int)bWindHonours.windType)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            return 0;
+
+        }
+    }
 }
 
 /// <summary>
@@ -231,7 +324,7 @@ public enum WindType
 {
     None,   
     East,   // “Œ
+    South,  // “ì
     West,   // ¼
-    North,  // “ì
-    South   // –k
+    North,  // –k
 }
